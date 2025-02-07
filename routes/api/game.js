@@ -201,322 +201,74 @@ router.get("/play/:id", auth, async (req, res) => {
     try {
         const game = await Game.findById(req.params.id);
         const user = await User.findById(req.user.id).select("-password");
-        let balance = user.balance;
+
+        const brand_id=process.env.BRAND_ID;
+        const brand_uid=user.name;
+        const api_key=process.env.KEY_ID;
+        const HASH = brand_id+brand_uid+api_key;
+        const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
        
-        let betLimit = {};
-        let hall = null;
-        let autoBetMode = null;
-        let enableTable = null;
-        let tid = null;
+        console.log(game.platform);
+        console.log("playyyyyyyyyyyyyyy//iddd");
 
-        if (game.platform != "SBO") {
-            if (game.platform == "SEXYBCRT") {
-                hall = "SEXY";
-                autoBetMode = "1";
-                enableTable = "true";
-                switch (game.gameName.toLowerCase().replace(/\s/g, "")) {
-                    case "baccarrtclassic":
-                        tid = "1";
-                        break;
-                    case "baccaratinsurance":
-                        tid = "21";
-                        break;
-                    case "dragontiger":
-                        tid = "31";
-                        break;
-                    case "roulette":
-                        tid = "31";
-                        break;
-                    case "rbsicbo":
-                        tid = "56";
-                        break;
-                    case "thaihi-lo":
-                        tid = "121";
-                        break;
-                    case "thaifishprawncrab":
-                        tid = "126";
-                        break;
-                    case "extraandarbahar":
-                        tid = "101";
-                        break;
-                    case "extrasicbo":
-                        tid = "131";
-                        break;
-                    case "teenpatti2020":
-                        tid = "81";
-                        break;
-                    case "sedie":
-                        tid = "151";
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (game.platform == "VENUS") {
-                autoBetMode = "1";
-                enableTable = "true";
-                switch (game.gameName.toLowerCase().replace(/\s/g, "")) {
-                    case "baccaratspeed":
-                        tid = "1";
-                        break;
-                    case "baccaratspeedy":
-                        tid = "1";
-                        break;
-                    case "baccarrtclassic":
-                        tid = "2";
-                        break;
-                    case "baccaratinsurance":
-                        tid = "21";
-                        break;
-                    case "dragontiger":
-                        tid = "31";
-                        break;
-                    case "sicbo":
-                        tid = "51";
-                        break;
-                    case "fishprawncrab":
-                        tid = "61";
-                        break;
-                    case "roulette":
-                        tid = "71";
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (game.platform == "PT" || game.platform == "PP") {
-                enableTable = "true";
-            }
-
-            if (game.platform == "HORSEBOOK") {
-                game.gameType = "LIVE";
-                betLimit = {
-                    HORSEBOOK: {
-                        LIVE: {
-                            minorMaxbet: 5000,
-                            minorMinbet: 50,
-                            minorMaxBetSumPerHorse: 15000,
-                            maxbet: 5000,
-                            minbet: 50,
-                            maxBetSumPerHorse: 30000,
-                            fare: 50,
-                        },
-                    },
-                };
-            }
-
-            if (game.gameType == "LIVE") {
-                if (game.platform == "PP") {
-                    betLimit = {
-                        PP: {
-                            LIVE: {
-                                limitId: ["G1"],
-                            },
-                        },
-                    };
-                }
-                if (game.platform == "SEXYBCRT") {
-                    betLimit = {
-                        SEXYBCRT: {
-                            LIVE: {
-                                limitId: [280901, 280903, 280904],
-                            },
-                        },
-                    };
-                }
-                if (game.platform == "SV388") {
-                    betLimit = {
-                        SV388: {
-                            LIVE: {
-                                maxbet: 10000,
-                                minbet: 1,
-                                mindraw: 1,
-                                matchlimit: 20000,
-                                maxdraw: 4000,
-                            },
-                        },
-                    };
-                }
-                if (game.platform == "VENUS") {
-                    betLimit = {
-                        VENUS: {
-                            LIVE: {
-                                limitId: [280902, 280903],
-                            },
-                        },
-                    };
-                }
-            }
-
-            console.log(game.gameName);
-            if (game.platform == "SEXYBCRT") {
-                switch (game.gameName.toLowerCase().replace(/\s/g, "")) {
-                    case "baccarat":
-                    case "baccaratclassic":
-                        tid = 1;
-                        break;
-                    case "dragontiger":
-                        tid = 31;
-                        break;
-                    case "roulette":
-                        tid = 71;
-                        break;
-                    case "redblueduel":
-                    case "rbsicbo":
-                        tid = 56;
-                        break;
-                    case "thaihilo":
-                        tid = 121;
-                        break;
-                    case "thaifishprawncrab":
-                        tid = 126;
-                        break;
-                    case "extraandarbahar":
-                        tid = 101;
-                        break;
-                    case "extrasicbo":
-                        tid = 131;
-                        break;
-                    case "teenpatti2020":
-                        tid = 81;
-                        break;
-                    case "sedie":
-                        tid = 151;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            // console.log("gamename-------", game.gameName.toLowerCase().replace(/\s/g, ""));
-            // console.log("platform--------", game.platform)
-            // console.log("tid-----------", tid)
-
-            var options = {};
-
-            if (
-                game.gameCode == "JILI-SLOT-033" ||
-                game.gameCode == "JILI-SLOT-034" ||
-                game.gameCode == "JILI-SLOT-035" ||
-                game.gameCode == "JILI-SLOT-036"
-            ) {
-                const updatedGameType =
-                    game.gameType === "THAI" &&
-                    game.gameCode.startsWith("LUCKYPOKER-")
-                        ? "TABLE"
-                        : game.gameType === "THAI" &&
-                          (game.gameCode.startsWith("DRAGOONSOFT-") ||
-                              game.gameCode.startsWith("KM-") ||
-                              game.gameCode.startsWith("JDB-") ||
-                              game.gameCode.startsWith("PP-") ||
-                              game.gameCode.startsWith("PT-") ||
-                              game.gameCode.startsWith("YL-"))
-                        ? "SLOT"
-                        : game.gameType;
-
-                options = {
-                    method: "POST",
-                    url: process.env.AWC_HOST + "/wallet/login",
-                    headers: {
-                        "content-type": "application/x-www-form-urlencoded",
-                    },
-                    data: {
-                        cert: process.env.AWC_CERT,
-                        agentId: process.env.AWC_AGENT_ID,
-                        userId: user.name,
-                        isMobileLogin: "false",
-                        externalURL: process.env.FRONTEND_URL,
-                        platform: game.platform,
-                        gameType: updatedGameType,
-                        language: "en",
-                        betLimit: JSON.stringify(betLimit),
-                        autoBetMode,
-                    },
-                };
-            } else {
-                const updatedGameType =
-                    game.gameType === "THAI" &&
-                    game.gameCode.startsWith("LUCKYPOKER-")
-                        ? "TABLE"
-                        : game.gameType === "THAI" &&
-                          (game.gameCode.startsWith("DRAGOONSOFT-") ||
-                              game.gameCode.startsWith("KM-") ||
-                              game.gameCode.startsWith("JDB-") ||
-                              game.gameCode.startsWith("PP-") ||
-                              game.gameCode.startsWith("PT-") ||
-                              game.gameCode.startsWith("YL-"))
-                        ? "SLOT"
-                        : game.gameType;
-                options = {
-                    method: "POST",
-                    url: process.env.AWC_HOST + "/wallet/doLoginAndLaunchGame",
-                    headers: {
-                        "content-type": "application/x-www-form-urlencoded",
-                    },
-                    data: {
-                        cert: process.env.AWC_CERT,
-                        agentId: process.env.AWC_AGENT_ID,
-                        userId: user.name,
-                        isMobileLogin: "false",
-                        externalURL: process.env.FRONTEND_URL,
-                        platform: game.platform,
-                        gameType: updatedGameType,
-                        gameCode: game.gameCode,
-                        language: "en",
-                        hall,
-                        betLimit: JSON.stringify(betLimit),
-                        autoBetMode,
-                        isLaunchGameTable: enableTable,
-                        gameTableId: tid,
-                    },
-                };
-            }
-
+        if (game.platform == "7Mojos" || game.platform == "AvatarUX" || game.platform=="Peter Sons" || game.platform=="FunTa Gaming" || game.platform=="Evoplay" || game.platform == "Hacksaw Gaming" || game.platform == "Nolimit City" || game.platform=="ParlayBay" || game.platform == "Relax Gaming" || game.platform == "Slotmill" || game.platform == "Yggdrasil Gaming" || game.platform=="Play'n GO" || game.platform=="Turbo Games (Asia)" || game.platform=="SmartSoft") {
+            
+            var options = {
+                method: "POST",
+                url: process.env.DCT_BASE_URL + "/dct/loginGame",
+                headers: { "content-type": "application/json" },
+                data: {
+                    brand_id: brand_id,
+                    sign: hashh,
+                    brand_uid: brand_uid,
+                    game_id: game.gameCode,
+                    currency: 'THB',
+                    language: "en",
+                    channel: 'pc',
+                    country_code:'TH'
+                   
+                },
+            };
+    
             console.log(options.data);
 
             await axios
-                .request(options)
-                .then(function (response) {
-                    console.log("response.data===", response.data);
-                    if (response.data.status == "0000" && balance>0) {
-                        res.json({
-                            status: "0000",
-                            session_url: response.data.url,
-                        });
-                    } 
-                    else if(balance<=0){
-                        res.json({
-                            status: "-1",
-                            desc: "Your Balance is 0. Please make deposit first.",
-                        });
-                    }
-                    else {
-                        res.json({
-                            status: response.data.status,
-                            desc: response.data.desc,
-                        });
-                    }
-                })
-                .catch(function (error) {
-                    console.error(error);
-                });
-        } else if (game.platform == "SBO") {
-            const user = await User.findById(req.user.id).select("-password");
-            const resp_sbo = await loginToSBO(user.name);
-            if (resp_sbo.error.msg == "No Error")
-                res.json({
-                    status: "0000",
-                    session_url: resp_sbo.url,
-                });
-            else
-                res.json({
-                    status: "0001",
-                    desc: resp_sbo.error.msg,
-                });
+            .request(options)
+            .then(function (response) {
+                console.log("DCT response.data===", response.data);
+                console.log("DCT response.code===", response.data.data);
+                if (response.data.code == "1000") {
+                    res.json({
+                        status: "0000",
+                        session_url: response.data.data.game_url,
+                    });
+                } else {
+                    res.json({
+                        status: response.data.code,
+                        desc: response.data.msg,
+                    });
+                }
+            })
+            .catch(function (error) {
+                console.error(error);
+            });
+
+
+
+
+
+          
+            
+          
+           
+            
+                       
+
+            
         }
-    } catch (err) {
+    }
+        
+     catch (err) {
         console.error(err.message);
         res.status(500).send("Server Error");
     }
@@ -527,6 +279,7 @@ router.get("/play/:id", auth, async (req, res) => {
 // @access   Private
 router.post("/play", auth, async (req, res) => {
     try {
+       
         const { gameCode, gameType, platform, hall, tid } = req.body;
         const user = await User.findById(req.user.id).select("-password");
         const betLimit = {};
@@ -587,6 +340,9 @@ router.post("/play", auth, async (req, res) => {
                 };
             }
         }
+        if(platform!='yg')
+        {
+           
         var options = {
             method: "POST",
             url: process.env.AWC_HOST + "/wallet/doLoginAndLaunchGame",
@@ -630,10 +386,13 @@ router.post("/play", auth, async (req, res) => {
             .catch(function (error) {
                 console.error(error);
             });
+        }
+       
     } catch (err) {
         console.error(err.message);
-        res.status(500).send("Server Error");
+        res.status(500).send("Server Error in game play");
     }
+
 });
 
 module.exports = router;
