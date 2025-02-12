@@ -15,6 +15,42 @@ const upload = multer({
     // you might also want to set some limits: https://github.com/expressjs/multer#limits
 });
 
+router.post("/addNewGame", async (req, res) => {
+    try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit'
+		});
+		const date = new Date();
+		const todayDateTime = formatter.format(date).replace(/\//g, '');
+       
+            const { gameCode, gameType, platform, gameName } = req.body;
+            let game = new Game({
+                gameCode,
+                gameType,
+                gameName,
+                platform,
+                img: gameCode+'.png',
+               date:date
+            });
+            game.save()
+                .then((res) => {
+                    console.log(res);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            res.json({ status: "0000", game });
+        }
+     catch (err) {
+        console.error(err.message);
+        res.status(500).send("Server Error");
+    }
+});
 // @route    POST api/game
 // @desc     Save a new Game
 // @access   Private
