@@ -101,7 +101,7 @@ router.post("/deposit_dct",auth, async (req, res) => {
 								if(user.balance!='NaN')
 								{
                                 user.balance =
-                                    Number(user.balance) +
+                                    Number(resp.data.balance) +
                                     Number(amount);
                                 user.save();
                                 console.log("user balance updated");
