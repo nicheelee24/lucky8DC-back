@@ -97,11 +97,12 @@ router.post("/deposit_dct",auth, async (req, res) => {
                         User.findById(req.user.id)
                             .then((user) => {
 								console.log("userrr balance..."+user.balance);
+								
 								if(user.balance!='NaN')
 								{
                                 user.balance =
                                     Number(user.balance) +
-                                    Number(req.amount);
+                                    Number(amount);
                                 user.save();
                                 console.log("user balance updated");
 								res.send({ status:"0" });
