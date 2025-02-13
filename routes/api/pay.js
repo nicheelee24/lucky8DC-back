@@ -78,7 +78,7 @@ router.post("/deposit_dct",auth, async (req, res) => {
                 console.log(resp);
 				console.log(resp.body);
 				console.log(resp.data);
-                if (resp.data.code == 1000) {
+                if (resp.code == 1000) {
                    console.log("success");
 
                     try {
@@ -101,6 +101,7 @@ router.post("/deposit_dct",auth, async (req, res) => {
                                     Number(req.amount);
                                 user.save();
                                 console.log("user balance updated");
+								res.send({ status:"0" });
                             })
                             .catch((err) => {
                                 console.log(
