@@ -248,7 +248,7 @@ router.get("/play/:id", auth, async (req, res) => {
         console.log(game.platform);
         console.log("playyyyyyyyyyyyyyy//iddd");
 
-        if (game.platform == "Evolution" ||game.platform == "7Mojos" || game.platform == "AvatarUX" || game.platform=="Peter Sons" || game.platform=="FunTa Gaming" || game.platform=="Evoplay" || game.platform == "Hacksaw Gaming" || game.platform == "Nolimit City" || game.platform=="ParlayBay" || game.platform == "Relax Gaming" || game.platform == "Slotmill" || game.platform == "Yggdrasil Gaming" || game.platform=="Play'n GO" || game.platform=="Turbo Games (Asia)" || game.platform=="SmartSoft") {
+        if (game.platform == "Ezugi" || game.platform == "Yolted" || game.platform == "Win Fast" || game.platform == "SA Gaming" || game.platform == "Evolution" || game.platform == "7Mojos" || game.platform == "AvatarUX" || game.platform=="Peter Sons" || game.platform=="FunTa Gaming" || game.platform=="Evoplay" || game.platform == "Hacksaw Gaming" || game.platform == "Nolimit City" || game.platform=="ParlayBay" || game.platform == "Relax Gaming" || game.platform == "Slotmill" || game.platform == "Yggdrasil Gaming" || game.platform=="Play'n GO" || game.platform=="Turbo Games (Asia)" || game.platform=="SmartSoft") {
             
             var options = {
                 method: "POST",
