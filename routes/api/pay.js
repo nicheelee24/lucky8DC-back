@@ -36,11 +36,10 @@ router.post("/deposit_dct",auth, async (req, res) => {
         
         const brand_uid= user.name;
         const dct_key=process.env.KEY_ID;
-        const HASH = brand_id+dct_key;
+        const HASH = brand_id+brand_uid+dct_key;
 		
         const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
-		console.log(hashh);
-
+		console.log(hashh)
         const DEPOSIT_URL = `${process.env.PMG_BASE_URL}/api/v1/Payment/Deposit`;
         const DEPOSIT_URL_DCT = `${process.env.DCT_BASE_URL}/dct/credit`;
 
