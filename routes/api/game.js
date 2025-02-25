@@ -245,6 +245,7 @@ router.get("/play/:id", auth, async (req, res) => {
         const HASH = brand_id+brand_uid+api_key;
         const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
        
+        gmcode=game.gameCode;
         console.log(game.platform);
         console.log("playyyyyyyyyyyyyyy//iddd");
 
@@ -258,7 +259,7 @@ router.get("/play/:id", auth, async (req, res) => {
                     brand_id: brand_id,
                     sign: hashh,
                     brand_uid: brand_uid,
-                    game_id: game.gameCode,
+                    game_id: parseInt(game.gameCode),
                     currency: 'THB',
                     language: "en",
                     channel: 'pc',
