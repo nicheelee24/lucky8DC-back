@@ -53,7 +53,7 @@ router.post("/deposit_dct",auth, async (req, res) => {
 
                     // --- DCT CREDIT API PARAMS ---
                     brand_id: process.env.BRAND_ID,
-                  //  sign: hashh,
+                    sign: hashh,
                     brand_uid: user.name,
                     amount: amount,
                     bill_no: bill_no,
