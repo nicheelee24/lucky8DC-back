@@ -57,8 +57,8 @@ router.post("/deposit_dct",auth, async (req, res) => {
                     brand_uid: user.name,
                     amount: amount,
                     bill_no: bill_no,
-                    currency: "THB",
-                    country_code: "TH",
+                    currency: "CNY",
+                    country_code: "CN",
                     hrefbackUrl:process.env.CALLBACK_URL
                        
                 },
