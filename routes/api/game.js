@@ -263,7 +263,7 @@ router.get("/play/:id", auth, async (req, res) => {
                     currency: 'CNY',
                     language: "en",
                     channel: 'pc',
-                    country_code:'CN'
+                    country_code:'HK'
                    
                 },
             };
