@@ -1906,6 +1906,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 		.request(options)
 		.then(function (response) {
 			console.log("response.data===", response.data + '....' + response.code);
+			console.log("stttsssss.."+response.data.status);
 			if (response.data.status == "1000") {
 				res.json({
 				balance:response.data.balance
