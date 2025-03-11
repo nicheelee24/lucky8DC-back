@@ -1875,7 +1875,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 
 	console.log("user data..." + user);
 
-	if (user) {
+	
 		balance = user.balance ? user.balance : 0;
 		console.log("balance amaount...." + balance);
 
@@ -1887,13 +1887,13 @@ router.post("/dc_balance", auth, async (req, res) => {
 		const HASH = brand_id + brand_uid + api_key;
 		const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
 
-	}
+	
 	var options = {
 		method: "POST",
 		url: process.env.DCT_BASE_URL + "/dct/getBalance ",
 		headers: { "content-type": "application/x-www-form-urlencoded" },
 		data: {
-			brand_id: brand_id,
+			brand_id: process.env.BRAND_ID,
 			brand_uid: brand_uid,
 			currency: currency,
 			HASH: brand_id + brand_uid + api_key,
