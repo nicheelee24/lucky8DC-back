@@ -20,116 +20,115 @@ router.post("/smartpay_deposit_callback", auth, async (req, res) => {
 
 })
 
-router.post("/deposit_dct",auth, async (req, res) => {
-    try {
+router.post("/deposit_dct", auth, async (req, res) => {
+	try {
 
-        console.log("deposit function called..");
-        const { amount, currency, platform } = req.body;
-        const bill_no=require('crypto').randomBytes(10).toString('hex');
-        const  brand_id= process.env.BRAND_ID;
-        
-        //console.log(bill_no);
-        console.log("before user"+req.body);
-     // const phn=  window.localStorage.setItem("phn", response.data.user_phn);
-     // console.log("Phnnnn"+phn);
-        const user = await User.findById(req.user.id).select("-password");
-        
-        const brand_uid= user.name;
-        const dct_key=process.env.KEY_ID;
-        const HASH = brand_id+brand_uid+dct_key;
-        const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
+		console.log("deposit function called..");
+		const { amount, currency, platform } = req.body;
+		const bill_no = require('crypto').randomBytes(10).toString('hex');
+		const brand_id = process.env.BRAND_ID;
+
+		//console.log(bill_no);
+		console.log("before user" + req.body);
+		// const phn=  window.localStorage.setItem("phn", response.data.user_phn);
+		// console.log("Phnnnn"+phn);
+		const user = await User.findById(req.user.id).select("-password");
+
+		const brand_uid = user.name;
+		const dct_key = process.env.KEY_ID;
+		const HASH = brand_id + brand_uid + dct_key;
+		const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
 		//console.log("hassshh value.."+hashh);
-        const DEPOSIT_URL = `${process.env.PMG_BASE_URL}/api/v1/Payment/Deposit`;
-        const DEPOSIT_URL_DCT = `${process.env.DCT_BASE_URL}/dct/credit`;
+		const DEPOSIT_URL = `${process.env.PMG_BASE_URL}/api/v1/Payment/Deposit`;
+		const DEPOSIT_URL_DCT = `${process.env.DCT_BASE_URL}/dct/credit`;
 
-        await axios
-            .post(
-                DEPOSIT_URL_DCT,
-                {
-                    // --- BANK API PARAMS ---
-                    // clientCode: process.env.CLIENT_CODE,
-                    // memberFlag: user.name,
-                    // amount: amount,
+		await axios
+			.post(
+				DEPOSIT_URL_DCT,
+				{
+					// --- BANK API PARAMS ---
+					// clientCode: process.env.CLIENT_CODE,
+					// memberFlag: user.name,
+					// amount: amount,
 
-                    // --- DCT CREDIT API PARAMS ---
-                    brand_id: process.env.BRAND_ID,
-                    sign: hashh,
-                    brand_uid: user.name,
-                    amount: amount,
-                    bill_no: bill_no,
-                    currency: "CNY",
-                    country_code: "HK",
-                    hrefbackUrl:process.env.CALLBACK_URL
-                       
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        // "authorization": HASH,
+					// --- DCT CREDIT API PARAMS ---
+					brand_id: process.env.BRAND_ID,
+					sign: hashh,
+					brand_uid: user.name,
+					amount: amount,
+					bill_no: bill_no,
+					currency: "CNY",
+					country_code: "HK",
+					hrefbackUrl: process.env.CALLBACK_URL
 
-                        //"Accept": "application/json",
-                       
+				},
+				{
+					headers: {
+						"Content-Type": "application/json",
+						// "authorization": HASH,
 
-                       // Authorization: `Bearer ${process.env.TESLLA_PAY_TOKEN}`,
-                    },
-                }
-            )
-            .then(function (response) {
-                const resp=response.data;
-                console.log(resp);
+						//"Accept": "application/json",
+
+
+						// Authorization: `Bearer ${process.env.TESLLA_PAY_TOKEN}`,
+					},
+				}
+			)
+			.then(function (response) {
+				const resp = response.data;
+				console.log(resp);
 				console.log(resp.body);
 				console.log(resp.data);
-                if (resp.code == 1000) {
-                   console.log("success");
+				if (resp.code == 1000) {
+					console.log("success");
 
-                    try {
-                        let transaction = new Transaction({
-                           // userid: req.user.id,
-                          //  clientCode: "",//process.env.CLIENT_CODE,
-                          //  payAmount: resp.requestAmount,
-                          //  trxNo: resp.orderNo,
-                           // sign: resp.sign,
-                           // status: resp.status,
-                           // type: "deposit",
-                           // platform: "DCT",
-                        });
-                       // transaction.save();
+					try {
+						let transaction = new Transaction({
+							// userid: req.user.id,
+							//  clientCode: "",//process.env.CLIENT_CODE,
+							//  payAmount: resp.requestAmount,
+							//  trxNo: resp.orderNo,
+							// sign: resp.sign,
+							// status: resp.status,
+							// type: "deposit",
+							// platform: "DCT",
+						});
+						// transaction.save();
 
-                        User.findById(req.user.id)
-                            .then((user) => {
-								console.log("userrr balance..."+user.balance);
-								
-								if(user.balance!='NaN')
-								{
-                                user.balance =
-                                    Number(resp.data.balance);
-                                user.save();
-                                console.log("user balance updated");
-								res.send({ status:"0" });
+						User.findById(req.user.id)
+							.then((user) => {
+								console.log("userrr balance..." + user.balance);
+
+								if (user.balance != 'NaN') {
+									user.balance =
+										Number(resp.data.balance);
+									user.save();
+									console.log("user balance updated");
+									res.send({ status: "0" });
 								}
-                            })
-                            .catch((err) => {
-                                console.log(
-                                    "/user balance update error user",
-                                    err
-                                );
-                            });
-                    } catch (ex) {
-                        //console.log("/deposit error", ex);
-                    }
+							})
+							.catch((err) => {
+								console.log(
+									"/user balance update error user",
+									err
+								);
+							});
+					} catch (ex) {
+						//console.log("/deposit error", ex);
+					}
 
-                  //  res.send({ payUrl: resp.payUrl });
+					//  res.send({ payUrl: resp.payUrl });
 
 
 
-                    // res.json({ status: "0000"});
-                } else {
-                    console.log("errrrorororoor");
-                }
-            });
-    } catch (ex) {
-        console.log("Error Exception On Deposit" + ex);
-    }
+					// res.json({ status: "0000"});
+				} else {
+					console.log("errrrorororoor");
+				}
+			});
+	} catch (ex) {
+		console.log("Error Exception On Deposit" + ex);
+	}
 });
 
 router.post("/smartpay/:chanlType", auth, async (req, res) => {
@@ -632,13 +631,13 @@ router.post("/balance_bigpay", async (req, res) => {
 	}
 })
 
-router.post("/deposit_bigpay_bank",auth, async (req, res) => {
+router.post("/deposit_bigpay_bank", auth, async (req, res) => {
 	try {
 
 		//console.log(req.body);
 		console.log("bigpay BANK deposit function called..");
 		const user = await User.findById(req.user.id).select("-password");
-		
+
 		console.log(user.name);
 		console.log(req.body[0]);		//--BIGPAY BANK METHOD PARAMS
 
@@ -646,7 +645,7 @@ router.post("/deposit_bigpay_bank",auth, async (req, res) => {
 		const ReturnURL = "https://ama777.cloud";
 		const FailedReturnURL = "https://ama777.cloud";
 		const HTTPPostURL = "https://games-back.kuab5b.easypanel.host/api/pay/bigpayz_deposit_callback";
-		const Amount =req.body[0];
+		const Amount = req.body[0];
 		const Currency = "THB";
 		const ItemID = require('crypto').randomBytes(6).toString('hex');
 		const ItemDescription = "bank payment";
@@ -685,7 +684,7 @@ router.post("/deposit_bigpay_bank",auth, async (req, res) => {
 					MerchantCode: MerchantCode,
 					ReturnURL: ReturnURL,
 					FailedReturnURL: FailedReturnURL,
-				    HTTPPostURL: HTTPPostURL,
+					HTTPPostURL: HTTPPostURL,
 					Amount: Amount,
 					Currency: Currency,
 					ItemID: ItemID,
@@ -724,191 +723,191 @@ router.post("/deposit_bigpay_bank",auth, async (req, res) => {
 				const resp = resonse.data;
 				console.log(resp);
 
-				
-					
-					if (resp.status == 0) {
-						// write the code for if user have promotion code then check the promotion accordingly add the bonous 
-						
-								
-							let transaction = new Transaction({
-								userid: req.user.id,
-								platform: 'luckyama',
-								userPhone: user.phone,
-								orderNo: ItemID,
-								payAmount: req.body[0],
-								status: 'initiated',
-								responseCode: 0,
-								type: "deposit",
-								provider: 'bigpayz-bank-'+req.body[1],
-								// trxNo: resp.invoice_number,
-							});
-							transaction.save();
-	
-							User.findById(req.user.id)
-								.then((user) => {
-									user.balance =
-										Number(user.balance) +
-										Number(req.body[0]);
-									user.save();
-									console.log("user balance updated after BANK deposit");
-								})
-								
-
-						if (user && user?.promotionId) {
-							const userPromotionInfo = await Promotion.findById(user.promotionId)
-							let promotionPermissions = userPromotionInfo.permissions;
-							if (userPromotionInfo && userPromotionInfo?.expDate) {
-
-								const expDateString = userPromotionInfo.expDate;
-								const [day, month, year] = expDateString.split('-');
-								const formattedDateString = `${year}-${month}-${day}`;
-
-								const expDateTimeStamp = new Date(formattedDateString).getTime();
-
-								const currentDate = new Date();
-								const currentDay = String(currentDate.getDate()).padStart(2, '0');  // Ensure day is 2 digits
-								const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');  // getMonth() is 0-based
-								const currentYear = currentDate.getFullYear();
-								const currentFormattedDateString = `${currentYear}-${currentMonth}-${currentDay}`;
-
-								const currentDateTimeStamp = new Date(currentFormattedDateString).getTime();
-								checkUserPlanExpire = expDateTimeStamp >= currentDateTimeStamp;
-
-								if (checkUserPlanExpire) {
-
-									let highestPercent = userPromotionInfo.highestPercent;
-									let bonusAmnt = userPromotionInfo.bonusAmnt;
-									let depositAmnt = userPromotionInfo.depositAmnt;
-									let userDepositeAmount = req.body[0];
-									let userBalance = user.balance;
-									let calculateDiscount = 0;
-									if (highestPercent && highestPercent > 0) {
-										calculateDiscount = req.body[0] * bonusAmnt / 100;
-									} else {
-										calculateDiscount = bonusAmnt;
-									}
-
-									if (userDepositeAmount >= depositAmnt && (promotionPermissions.includes("forFirstDeposit") || promotionPermissions.includes("autoBonus"))) {
 
 
-										if (promotionPermissions.includes("forFirstDeposit")) {
-											const todayStart = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
-											const todayEnd = new Date(new Date().toISOString().split('T')[0] + 'T23:59:59.999Z');
-											const result = await Transaction.find({
-												"date": {
-													$gte: todayStart,
-													$lt: todayEnd
-												},
-												userid: req.user.id
-											});
-											if (result.length == 0) {
-												userBalance = userBalance + calculateDiscount;
+				if (resp.status == 0) {
+					// write the code for if user have promotion code then check the promotion accordingly add the bonous 
 
-												const getBonusDetails = await Bonus.findOne({
-													userid: req.user.id,
-													promotionId: user.promotionId
-												});
-												if (getBonusDetails) {
-													getBonusDetails.quantity = getBonusDetails.quantity + 1
-													await getBonusDetails.save();
-												} else {
-													// add entry in the bonus table 
-													let betResult = await Bet.aggregate([
-														{
-															$match: {
-																userId: user.name,
-																// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
-															},
-														},
-														{
-															$group: {
-																_id: null, // Grouping by null means aggregating all documents together
-																totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
-															},
-														},
-													]);
-													let totalBetAmount = 0;
-													if (betResult.length > 0) {
-														totalBetAmount = betResult[0].totalBetAmount;
-													}
-													let bonusEntity = new Bonus({
-														username: user.name,
-														userid: user._id,
-														promotionId: user.promotionId,
-														bonusType: userPromotionInfo.bonusType,
-														quantity: 1,
-														topUp: calculateDiscount,
-														cashBalanceFirst: user.balance,
-														cashBalanceAfter: userBalance,
-														turnover: totalBetAmount - userPromotionInfo.depositAmnt
-													});
-													bonusEntity.save();
-													// end code 
-												}
 
-												// Update the user's Promotion in the database
-												user.balance = userBalance;
-												await user.save();
-											}
-										}
-										if (promotionPermissions.includes("autoBonus")) {
+					let transaction = new Transaction({
+						userid: req.user.id,
+						platform: 'luckyama',
+						userPhone: user.phone,
+						orderNo: ItemID,
+						payAmount: req.body[0],
+						status: 'initiated',
+						responseCode: 0,
+						type: "deposit",
+						provider: 'bigpayz-bank-' + req.body[1],
+						// trxNo: resp.invoice_number,
+					});
+					transaction.save();
+
+					User.findById(req.user.id)
+						.then((user) => {
+							user.balance =
+								Number(user.balance) +
+								Number(req.body[0]);
+							user.save();
+							console.log("user balance updated after BANK deposit");
+						})
+
+
+					if (user && user?.promotionId) {
+						const userPromotionInfo = await Promotion.findById(user.promotionId)
+						let promotionPermissions = userPromotionInfo.permissions;
+						if (userPromotionInfo && userPromotionInfo?.expDate) {
+
+							const expDateString = userPromotionInfo.expDate;
+							const [day, month, year] = expDateString.split('-');
+							const formattedDateString = `${year}-${month}-${day}`;
+
+							const expDateTimeStamp = new Date(formattedDateString).getTime();
+
+							const currentDate = new Date();
+							const currentDay = String(currentDate.getDate()).padStart(2, '0');  // Ensure day is 2 digits
+							const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');  // getMonth() is 0-based
+							const currentYear = currentDate.getFullYear();
+							const currentFormattedDateString = `${currentYear}-${currentMonth}-${currentDay}`;
+
+							const currentDateTimeStamp = new Date(currentFormattedDateString).getTime();
+							checkUserPlanExpire = expDateTimeStamp >= currentDateTimeStamp;
+
+							if (checkUserPlanExpire) {
+
+								let highestPercent = userPromotionInfo.highestPercent;
+								let bonusAmnt = userPromotionInfo.bonusAmnt;
+								let depositAmnt = userPromotionInfo.depositAmnt;
+								let userDepositeAmount = req.body[0];
+								let userBalance = user.balance;
+								let calculateDiscount = 0;
+								if (highestPercent && highestPercent > 0) {
+									calculateDiscount = req.body[0] * bonusAmnt / 100;
+								} else {
+									calculateDiscount = bonusAmnt;
+								}
+
+								if (userDepositeAmount >= depositAmnt && (promotionPermissions.includes("forFirstDeposit") || promotionPermissions.includes("autoBonus"))) {
+
+
+									if (promotionPermissions.includes("forFirstDeposit")) {
+										const todayStart = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+										const todayEnd = new Date(new Date().toISOString().split('T')[0] + 'T23:59:59.999Z');
+										const result = await Transaction.find({
+											"date": {
+												$gte: todayStart,
+												$lt: todayEnd
+											},
+											userid: req.user.id
+										});
+										if (result.length == 0) {
 											userBalance = userBalance + calculateDiscount;
 
-											// add entry in the bonus table 
-											let betResult = await Bet.aggregate([
-												{
-													$match: {
-														userId: user.name,
-														// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
-													},
-												},
-												{
-													$group: {
-														_id: null, // Grouping by null means aggregating all documents together
-														totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
-													},
-												},
-											]);
-											let totalBetAmount = 0;
-											if (betResult.length > 0) {
-												totalBetAmount = betResult[0].totalBetAmount;
-											}
-											let bonusEntity = new Bonus({
-												username: user.name,
-												userid: user._id,
-												promotionId: user.promotionId,
-												bonusType: userPromotionInfo.bonusType,
-												quantity: 1,
-												topUp: calculateDiscount,
-												cashBalanceFirst: user.balance,
-												cashBalanceAfter: userBalance,
-												turnover: totalBetAmount - userPromotionInfo.depositAmnt
+											const getBonusDetails = await Bonus.findOne({
+												userid: req.user.id,
+												promotionId: user.promotionId
 											});
-											bonusEntity.save();
-											// end code 
+											if (getBonusDetails) {
+												getBonusDetails.quantity = getBonusDetails.quantity + 1
+												await getBonusDetails.save();
+											} else {
+												// add entry in the bonus table 
+												let betResult = await Bet.aggregate([
+													{
+														$match: {
+															userId: user.name,
+															// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
+														},
+													},
+													{
+														$group: {
+															_id: null, // Grouping by null means aggregating all documents together
+															totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
+														},
+													},
+												]);
+												let totalBetAmount = 0;
+												if (betResult.length > 0) {
+													totalBetAmount = betResult[0].totalBetAmount;
+												}
+												let bonusEntity = new Bonus({
+													username: user.name,
+													userid: user._id,
+													promotionId: user.promotionId,
+													bonusType: userPromotionInfo.bonusType,
+													quantity: 1,
+													topUp: calculateDiscount,
+													cashBalanceFirst: user.balance,
+													cashBalanceAfter: userBalance,
+													turnover: totalBetAmount - userPromotionInfo.depositAmnt
+												});
+												bonusEntity.save();
+												// end code 
+											}
 
 											// Update the user's Promotion in the database
 											user.balance = userBalance;
 											await user.save();
 										}
-
-
 									}
+									if (promotionPermissions.includes("autoBonus")) {
+										userBalance = userBalance + calculateDiscount;
+
+										// add entry in the bonus table 
+										let betResult = await Bet.aggregate([
+											{
+												$match: {
+													userId: user.name,
+													// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
+												},
+											},
+											{
+												$group: {
+													_id: null, // Grouping by null means aggregating all documents together
+													totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
+												},
+											},
+										]);
+										let totalBetAmount = 0;
+										if (betResult.length > 0) {
+											totalBetAmount = betResult[0].totalBetAmount;
+										}
+										let bonusEntity = new Bonus({
+											username: user.name,
+											userid: user._id,
+											promotionId: user.promotionId,
+											bonusType: userPromotionInfo.bonusType,
+											quantity: 1,
+											topUp: calculateDiscount,
+											cashBalanceFirst: user.balance,
+											cashBalanceAfter: userBalance,
+											turnover: totalBetAmount - userPromotionInfo.depositAmnt
+										});
+										bonusEntity.save();
+										// end code 
+
+										// Update the user's Promotion in the database
+										user.balance = userBalance;
+										await user.save();
+									}
+
+
 								}
 							}
 						}
-
-						// end code 
-						//res.send({ PayUrl: resp.redirect_to, code: 0, gateway: 'bpay' });
-						res.send({ error: "API Response Code", code: resp.status, msg: 'Something went wrong.', PayUrl: resp.redirect_to,gateway: 'bpayz-bank',method:'bank' });
-					}
-					else {
-						
-						res.send({ error: resp.error_message + "*", code: resp.error_code,msg: resp.message, PayUrl: "" });
 					}
 
+					// end code 
+					//res.send({ PayUrl: resp.redirect_to, code: 0, gateway: 'bpay' });
+					res.send({ error: "API Response Code", code: resp.status, msg: 'Something went wrong.', PayUrl: resp.redirect_to, gateway: 'bpayz-bank', method: 'bank' });
+				}
+				else {
 
-				
+					res.send({ error: resp.error_message + "*", code: resp.error_code, msg: resp.message, PayUrl: "" });
+				}
+
+
+
 			});
 	}
 	catch (ex) {
@@ -917,13 +916,13 @@ router.post("/deposit_bigpay_bank",auth, async (req, res) => {
 
 });
 
-router.post("/deposit_bigpay_qr",auth, async (req, res) => {
+router.post("/deposit_bigpay_qr", auth, async (req, res) => {
 	try {
 
 		//console.log(req.body);
 		console.log("bigpay qr deposit function called..");
 		const user = await User.findById(req.user.id).select("-password");
-		
+
 		//console.log(user.name);
 
 		//--BIGPAY BANK METHOD PARAMS
@@ -1010,191 +1009,191 @@ router.post("/deposit_bigpay_qr",auth, async (req, res) => {
 				const resp = resonse.data;
 				console.log(resp);
 
-				
-					
-					if (resp.error_code == 0) {
-						// write the code for if user have promotion code then check the promotion accordingly add the bonous 
-						
-								
-							let transaction = new Transaction({
-								userid: req.user.id,
-								platform: 'luckyama',
-								userPhone: user.phone,
-								orderNo: ref_id,
-								payAmount: req.body[0],
-								status: 'initiated',
-								responseCode: 0,
-								type: "deposit",
-								provider: 'bigpayz-qr',
-								// trxNo: resp.invoice_number,
-							});
-							transaction.save();
-	
-							User.findById(req.user.id)
-								.then((user) => {
-									user.balance =
-										Number(user.balance) +
-										Number(req.body[0]);
-									user.save();
-									console.log("user balance updated");
-								})
-								
-
-						if (user && user?.promotionId) {
-							const userPromotionInfo = await Promotion.findById(user.promotionId)
-							let promotionPermissions = userPromotionInfo.permissions;
-							if (userPromotionInfo && userPromotionInfo?.expDate) {
-
-								const expDateString = userPromotionInfo.expDate;
-								const [day, month, year] = expDateString.split('-');
-								const formattedDateString = `${year}-${month}-${day}`;
-
-								const expDateTimeStamp = new Date(formattedDateString).getTime();
-
-								const currentDate = new Date();
-								const currentDay = String(currentDate.getDate()).padStart(2, '0');  // Ensure day is 2 digits
-								const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');  // getMonth() is 0-based
-								const currentYear = currentDate.getFullYear();
-								const currentFormattedDateString = `${currentYear}-${currentMonth}-${currentDay}`;
-
-								const currentDateTimeStamp = new Date(currentFormattedDateString).getTime();
-								checkUserPlanExpire = expDateTimeStamp >= currentDateTimeStamp;
-
-								if (checkUserPlanExpire) {
-
-									let highestPercent = userPromotionInfo.highestPercent;
-									let bonusAmnt = userPromotionInfo.bonusAmnt;
-									let depositAmnt = userPromotionInfo.depositAmnt;
-									let userDepositeAmount = req.body[0];
-									let userBalance = user.balance;
-									let calculateDiscount = 0;
-									if (highestPercent && highestPercent > 0) {
-										calculateDiscount = req.body[0] * bonusAmnt / 100;
-									} else {
-										calculateDiscount = bonusAmnt;
-									}
-
-									if (userDepositeAmount >= depositAmnt && (promotionPermissions.includes("forFirstDeposit") || promotionPermissions.includes("autoBonus"))) {
 
 
-										if (promotionPermissions.includes("forFirstDeposit")) {
-											const todayStart = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
-											const todayEnd = new Date(new Date().toISOString().split('T')[0] + 'T23:59:59.999Z');
-											const result = await Transaction.find({
-												"date": {
-													$gte: todayStart,
-													$lt: todayEnd
-												},
-												userid: req.user.id
-											});
-											if (result.length == 0) {
-												userBalance = userBalance + calculateDiscount;
+				if (resp.error_code == 0) {
+					// write the code for if user have promotion code then check the promotion accordingly add the bonous 
 
-												const getBonusDetails = await Bonus.findOne({
-													userid: req.user.id,
-													promotionId: user.promotionId
-												});
-												if (getBonusDetails) {
-													getBonusDetails.quantity = getBonusDetails.quantity + 1
-													await getBonusDetails.save();
-												} else {
-													// add entry in the bonus table 
-													let betResult = await Bet.aggregate([
-														{
-															$match: {
-																userId: user.name,
-																// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
-															},
-														},
-														{
-															$group: {
-																_id: null, // Grouping by null means aggregating all documents together
-																totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
-															},
-														},
-													]);
-													let totalBetAmount = 0;
-													if (betResult.length > 0) {
-														totalBetAmount = betResult[0].totalBetAmount;
-													}
-													let bonusEntity = new Bonus({
-														username: user.name,
-														userid: user._id,
-														promotionId: user.promotionId,
-														bonusType: userPromotionInfo.bonusType,
-														quantity: 1,
-														topUp: calculateDiscount,
-														cashBalanceFirst: user.balance,
-														cashBalanceAfter: userBalance,
-														turnover: totalBetAmount - userPromotionInfo.depositAmnt
-													});
-													bonusEntity.save();
-													// end code 
-												}
 
-												// Update the user's Promotion in the database
-												user.balance = userBalance;
-												await user.save();
-											}
-										}
-										if (promotionPermissions.includes("autoBonus")) {
+					let transaction = new Transaction({
+						userid: req.user.id,
+						platform: 'luckyama',
+						userPhone: user.phone,
+						orderNo: ref_id,
+						payAmount: req.body[0],
+						status: 'initiated',
+						responseCode: 0,
+						type: "deposit",
+						provider: 'bigpayz-qr',
+						// trxNo: resp.invoice_number,
+					});
+					transaction.save();
+
+					User.findById(req.user.id)
+						.then((user) => {
+							user.balance =
+								Number(user.balance) +
+								Number(req.body[0]);
+							user.save();
+							console.log("user balance updated");
+						})
+
+
+					if (user && user?.promotionId) {
+						const userPromotionInfo = await Promotion.findById(user.promotionId)
+						let promotionPermissions = userPromotionInfo.permissions;
+						if (userPromotionInfo && userPromotionInfo?.expDate) {
+
+							const expDateString = userPromotionInfo.expDate;
+							const [day, month, year] = expDateString.split('-');
+							const formattedDateString = `${year}-${month}-${day}`;
+
+							const expDateTimeStamp = new Date(formattedDateString).getTime();
+
+							const currentDate = new Date();
+							const currentDay = String(currentDate.getDate()).padStart(2, '0');  // Ensure day is 2 digits
+							const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');  // getMonth() is 0-based
+							const currentYear = currentDate.getFullYear();
+							const currentFormattedDateString = `${currentYear}-${currentMonth}-${currentDay}`;
+
+							const currentDateTimeStamp = new Date(currentFormattedDateString).getTime();
+							checkUserPlanExpire = expDateTimeStamp >= currentDateTimeStamp;
+
+							if (checkUserPlanExpire) {
+
+								let highestPercent = userPromotionInfo.highestPercent;
+								let bonusAmnt = userPromotionInfo.bonusAmnt;
+								let depositAmnt = userPromotionInfo.depositAmnt;
+								let userDepositeAmount = req.body[0];
+								let userBalance = user.balance;
+								let calculateDiscount = 0;
+								if (highestPercent && highestPercent > 0) {
+									calculateDiscount = req.body[0] * bonusAmnt / 100;
+								} else {
+									calculateDiscount = bonusAmnt;
+								}
+
+								if (userDepositeAmount >= depositAmnt && (promotionPermissions.includes("forFirstDeposit") || promotionPermissions.includes("autoBonus"))) {
+
+
+									if (promotionPermissions.includes("forFirstDeposit")) {
+										const todayStart = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+										const todayEnd = new Date(new Date().toISOString().split('T')[0] + 'T23:59:59.999Z');
+										const result = await Transaction.find({
+											"date": {
+												$gte: todayStart,
+												$lt: todayEnd
+											},
+											userid: req.user.id
+										});
+										if (result.length == 0) {
 											userBalance = userBalance + calculateDiscount;
 
-											// add entry in the bonus table 
-											let betResult = await Bet.aggregate([
-												{
-													$match: {
-														userId: user.name,
-														// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
-													},
-												},
-												{
-													$group: {
-														_id: null, // Grouping by null means aggregating all documents together
-														totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
-													},
-												},
-											]);
-											let totalBetAmount = 0;
-											if (betResult.length > 0) {
-												totalBetAmount = betResult[0].totalBetAmount;
-											}
-											let bonusEntity = new Bonus({
-												username: user.name,
-												userid: user._id,
-												promotionId: user.promotionId,
-												bonusType: userPromotionInfo.bonusType,
-												quantity: 1,
-												topUp: calculateDiscount,
-												cashBalanceFirst: user.balance,
-												cashBalanceAfter: userBalance,
-												turnover: totalBetAmount - userPromotionInfo.depositAmnt
+											const getBonusDetails = await Bonus.findOne({
+												userid: req.user.id,
+												promotionId: user.promotionId
 											});
-											bonusEntity.save();
-											// end code 
+											if (getBonusDetails) {
+												getBonusDetails.quantity = getBonusDetails.quantity + 1
+												await getBonusDetails.save();
+											} else {
+												// add entry in the bonus table 
+												let betResult = await Bet.aggregate([
+													{
+														$match: {
+															userId: user.name,
+															// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
+														},
+													},
+													{
+														$group: {
+															_id: null, // Grouping by null means aggregating all documents together
+															totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
+														},
+													},
+												]);
+												let totalBetAmount = 0;
+												if (betResult.length > 0) {
+													totalBetAmount = betResult[0].totalBetAmount;
+												}
+												let bonusEntity = new Bonus({
+													username: user.name,
+													userid: user._id,
+													promotionId: user.promotionId,
+													bonusType: userPromotionInfo.bonusType,
+													quantity: 1,
+													topUp: calculateDiscount,
+													cashBalanceFirst: user.balance,
+													cashBalanceAfter: userBalance,
+													turnover: totalBetAmount - userPromotionInfo.depositAmnt
+												});
+												bonusEntity.save();
+												// end code 
+											}
 
 											// Update the user's Promotion in the database
 											user.balance = userBalance;
 											await user.save();
 										}
-
-
 									}
+									if (promotionPermissions.includes("autoBonus")) {
+										userBalance = userBalance + calculateDiscount;
+
+										// add entry in the bonus table 
+										let betResult = await Bet.aggregate([
+											{
+												$match: {
+													userId: user.name,
+													// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
+												},
+											},
+											{
+												$group: {
+													_id: null, // Grouping by null means aggregating all documents together
+													totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
+												},
+											},
+										]);
+										let totalBetAmount = 0;
+										if (betResult.length > 0) {
+											totalBetAmount = betResult[0].totalBetAmount;
+										}
+										let bonusEntity = new Bonus({
+											username: user.name,
+											userid: user._id,
+											promotionId: user.promotionId,
+											bonusType: userPromotionInfo.bonusType,
+											quantity: 1,
+											topUp: calculateDiscount,
+											cashBalanceFirst: user.balance,
+											cashBalanceAfter: userBalance,
+											turnover: totalBetAmount - userPromotionInfo.depositAmnt
+										});
+										bonusEntity.save();
+										// end code 
+
+										// Update the user's Promotion in the database
+										user.balance = userBalance;
+										await user.save();
+									}
+
+
 								}
 							}
 						}
-
-						// end code 
-						//res.send({ PayUrl: resp.redirect_to, code: 0, gateway: 'bpay' });
-						res.send({ error: "API Response Code", code: resp.error_code, msg: resp.message, PayUrl: resp.redirect_to,gateway: 'bpay',method:'qr' });
-					}
-					else {
-						
-						res.send({ error: resp.error_message + "*", code: resp.error_code,msg: resp.error_message, PayUrl: "" });
 					}
 
+					// end code 
+					//res.send({ PayUrl: resp.redirect_to, code: 0, gateway: 'bpay' });
+					res.send({ error: "API Response Code", code: resp.error_code, msg: resp.message, PayUrl: resp.redirect_to, gateway: 'bpay', method: 'qr' });
+				}
+				else {
 
-				
+					res.send({ error: resp.error_message + "*", code: resp.error_code, msg: resp.error_message, PayUrl: "" });
+				}
+
+
+
 			});
 	}
 	catch (ex) {
@@ -1204,48 +1203,48 @@ router.post("/deposit_bigpay_qr",auth, async (req, res) => {
 });
 
 router.post("/bigpayz_deposit_callback", async (req, res) => {
-	
+
 	console.log("deposit_callback");
 	console.log(res.body);
 	const contract = 1234;
-		const apikey = process.env.BIGPAY_KEY;
-		const transaction = '';
-		const status = 1;
-		const status_message = '';
-		const ItemID = '1234';
-		const ItemDescription = 'item123';
-		const Amount = 100;
-		const Currency = 'thb';
-		const ClientName = 'client1';
-		const signature2 = '';
-		const created_at = '';
-		const updated_at = '';
-		
-	
+	const apikey = process.env.BIGPAY_KEY;
+	const transaction = '';
+	const status = 1;
+	const status_message = '';
+	const ItemID = '1234';
+	const ItemDescription = 'item123';
+	const Amount = 100;
+	const Currency = 'thb';
+	const ClientName = 'client1';
+	const signature2 = '';
+	const created_at = '';
+	const updated_at = '';
 
-		// User.findById(trx.userid)
-		// 	.then((user) => {
-		// 		user.balance = Number(user.balance) + Number(payAmount);
-		// 		user.save();
-		// 	})
-		// 	.catch((err) => {
-		// 		console.log("/withdraw_callback error user", err);
-		// 	});
 
-		// Transaction.findOneAndUpdate(filter, update, { new: true })
-		// 	.then((updatedDocument) => {
-		// 		if (updatedDocument) {
-		// 			console.log(
-		// 				`Successfully updated document: ${updatedDocument}.`
-		// 			);
-		// 		} else {
-		// 			console.log("No document matches the provided query.");
-		// 		}
-		// 	})
-		// 	.catch((err) =>
-		// 		console.error(`Failed to find and update document: ${err}`)
-		// 	);
-	
+
+	// User.findById(trx.userid)
+	// 	.then((user) => {
+	// 		user.balance = Number(user.balance) + Number(payAmount);
+	// 		user.save();
+	// 	})
+	// 	.catch((err) => {
+	// 		console.log("/withdraw_callback error user", err);
+	// 	});
+
+	// Transaction.findOneAndUpdate(filter, update, { new: true })
+	// 	.then((updatedDocument) => {
+	// 		if (updatedDocument) {
+	// 			console.log(
+	// 				`Successfully updated document: ${updatedDocument}.`
+	// 			);
+	// 		} else {
+	// 			console.log("No document matches the provided query.");
+	// 		}
+	// 	})
+	// 	.catch((err) =>
+	// 		console.error(`Failed to find and update document: ${err}`)
+	// 	);
+
 
 	res.json({ status: "0000" });
 });
@@ -1345,7 +1344,7 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 		const amount = req.body.amount;
 		const user = await User.findById(req.user.id).select("-password");
 		const WITHDRAW_URL = `https://payout-api.bigpayz.net/Payout/Withdrawal`;
-		
+
 
 		if (Number(user.balance) < Number(amount)) {
 			res.send({
@@ -1359,7 +1358,7 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 
 		// check if user have promotion and promotion type is turnover 
 		const userPromotionInfo = await Promotion.findById(user.promotionId)
-		if(userPromotionInfo) {
+		if (userPromotionInfo) {
 			let promotionPermissions = userPromotionInfo.permissions;
 			if (promotionPermissions.includes("turnover")) {
 				let promotionTurnover = userPromotionInfo.turnover;
@@ -1369,7 +1368,7 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 					promotionId: user.promotionId
 				});
 
-				if(getBonusDetails) {
+				if (getBonusDetails) {
 					let shouldSpentonBet = getBonusDetails.topUp * promotionTurnover;
 					let actualBetSpentAmountAfterProApplied = 0;
 					let bonusApplyDate = getBonusDetails.addTime;
@@ -1394,24 +1393,24 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 							},
 						},
 					]);
-					if(result && result.length > 0) {
+					if (result && result.length > 0) {
 						actualBetSpentAmountAfterProApplied = result[0].totalBetAmountt;
 					}
-					if(actualBetSpentAmountAfterProApplied < shouldSpentonBet) {
+					if (actualBetSpentAmountAfterProApplied < shouldSpentonBet) {
 						res.send({
 							code: '-4',
 							success: false,
 							message: "You are not eligible to withdraw the amount!",
 						});
-			
+
 						return;
 					}
 				}
 
 			}
 		}
-    // end 
-		
+		// end 
+
 
 		// Start Check turnover
 		// check playing amount should be over withdrawal amount.
@@ -1447,14 +1446,14 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 			console.log("No bets found or sum is zero");
 		}
 
-		if (amount >totalBetAmount) {
-			 res.send({
-			   code:-3,
-			 success: false,
-			 message: "Not Enough Turnover!",
-			 });
+		if (amount > totalBetAmount) {
+			res.send({
+				code: -3,
+				success: false,
+				message: "Not Enough Turnover!",
+			});
 
-			  return;
+			return;
 		}
 		// End Check turnover
 
@@ -1515,8 +1514,8 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 			.then(async function (response) {
 				console.log("bigpay response...");
 				console.log(response.data);
-				
-				if (response.data.error_code !=0) {
+
+				if (response.data.error_code != 0) {
 					res.send({
 						code: response.data.error_code,
 						success: false,
@@ -1524,13 +1523,13 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 
 					});
 				}
-				
-				
+
+
 				else {
-					
+
 					try {
-						
-						
+
+
 
 						User.findById(req.user.id)
 							.then((user) => {
@@ -1548,14 +1547,14 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 									status: 'success',
 									type: "withdrawal",
 									platform: 'luckyama',
-									userPhone:user.phone
+									userPhone: user.phone
 								});
 								transaction.save();
 								res.send({
 									code: 0,
 									success: true,
 									message: response.data.error_message,
-			
+
 								});
 							})
 							.catch((err) => {
@@ -1567,7 +1566,7 @@ router.post("/bigpayz_withdraw", auth, async (req, res) => {
 					} catch (ex) {
 						console.log("/withdraw error", ex);
 					}
-					
+
 				}
 
 				// write the code here if user have promotion code deleteProm then applied promotion will get deleted 
@@ -1867,6 +1866,70 @@ router.post("/withdraw_callback", async (req, res) => {
 	res.json({ status: "0000" });
 });
 
+router.post("/dc_balance", auth, async (req, res) => {
+	let balance = 0;
+	let result = null;
+
+	console.log("usser id...." + req.user.id);
+	const user = await User.findById(req.user.id);
+
+	console.log("user data..." + user);
+
+	if (user) {
+		balance = user.balance ? user.balance : 0;
+		console.log("balance amaount...." + balance);
+
+		console.log("user id..." + user._id);
+		const brand_id = process.env.BRAND_ID;
+		const brand_uid = user.name;
+		const api_key = process.env.KEY_ID;
+		const currency = "CNY";
+		const HASH = brand_id + brand_uid + api_key;
+		const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
+
+	}
+	var options = {
+		method: "POST",
+		url: process.env.DCT_BASE_URL + "/dct/getBalance ",
+		headers: { "content-type": "application/x-www-form-urlencoded" },
+		data: {
+			brand_id: brand_id,
+			brand_uid: brand_uid,
+			currency: currency,
+			HASH: brand_id + brand_uid + api_key,
+			sign: hashh
+		},
+	};
+
+	console.log(options.data);
+
+	await axios
+		.request(options)
+		.then(function (response) {
+			console.log("response.data===", response.data);
+			if (response.data.status == "0000") {
+				res.json({
+					//status: "0000",
+					//session_url: response.data.url,
+				});
+			} else {
+				res.json({
+					//status: response.data.status,
+					//desc: response.data.desc,
+				});
+			}
+		})
+		.catch(function (error) {
+			console.error(error);
+		});
+
+
+
+	//user.save();
+
+	res.json({ balance });
+});
+
 router.post("/balance", auth, async (req, res) => {
 	let balance = 0;
 	let result = null;
@@ -1931,8 +1994,8 @@ router.post("/balance", auth, async (req, res) => {
 	} else {
 		console.log("No bets found or sum is zero");
 	}
-	user.turnoverAmt=totalTurnover;
-	user.turnovers=1;
+	user.turnoverAmt = totalTurnover;
+	user.turnovers = 1;
 	user.save();
 
 	res.json({ balance, totalTurnover, totalBetAmount });
