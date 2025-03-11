@@ -1907,11 +1907,12 @@ router.post("/dc_balance", auth, async (req, res) => {
 		.then(function (response) {
 			console.log("response.data===", response.data.code + '....balance==' + response.data.data.balance);
 			console.log("stttsssss.."+response.data.status);
+			balance=response.data.data.balance;
 			if (response.data.status == "1000") {
-				res.json({
-				balance:response.data.data.balance
+				res.send(
+				balance
 					//session_url: response.data.url,
-			});
+				);
 			} else {
 				res.json({
 					status: response.data.status,
