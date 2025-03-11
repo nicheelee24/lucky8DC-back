@@ -1919,7 +1919,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 			}
 		})
 		.catch(function (error) {
-			console.error(error);
+			console.error("errrrrrrrrrrorrr...balance api"+error);
 		});
 
 
