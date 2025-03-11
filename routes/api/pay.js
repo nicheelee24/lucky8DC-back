@@ -1891,7 +1891,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 	var options = {
 		method: "POST",
 		url: process.env.DCT_BASE_URL + "/dct/getBalance ",
-		headers: { "content-type": "application/x-www-form-urlencoded" },
+		headers: { "content-type": "application/json" },
 		data: {
 			brand_id: brand_id,
 			brand_uid: brand_uid,
