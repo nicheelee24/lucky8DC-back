@@ -1905,7 +1905,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 	await axios
 		.request(options)
 		.then(function (response) {
-			console.log("response.data===", response.data);
+			console.log("response.data===", response.data + '....' + response.code);
 			if (response.data.status == "0000") {
 				res.json({
 					//status: "0000",
