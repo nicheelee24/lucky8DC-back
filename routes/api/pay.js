@@ -1905,11 +1905,11 @@ router.post("/dc_balance", auth, async (req, res) => {
 	await axios
 		.request(options)
 		.then(function (response) {
-			console.log("response.data===", response.data.code + '....balance==' + response.data.balance);
+			console.log("response.data===", response.data.code + '....balance==' + response.data.data.balance);
 			console.log("stttsssss.."+response.data.status);
 			if (response.data.status == "1000") {
 				res.json({
-				balance:response.data.balance
+				balance:response.data.data.balance
 					//session_url: response.data.url,
 			});
 			} else {
