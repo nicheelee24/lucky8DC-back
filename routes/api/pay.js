@@ -1867,6 +1867,69 @@ router.post("/withdraw_callback", async (req, res) => {
 	res.json({ status: "0000" });
 });
 
+router.post("/dc_balance", auth, async (req, res) => {
+	let balance = 0;
+	let result = null;
+
+	console.log("usser id...." + req.user.id);
+	const user = await User.findById(req.user.id);
+
+	console.log("user data..." + user);
+
+	
+		balance = user.balance ? user.balance : 0;
+		console.log("balance amaount...." + balance);
+
+		console.log("user id..." + user._id);
+		const brand_id = process.env.BRAND_ID;
+		const brand_uid = user.name;
+		const api_key = process.env.KEY_ID;
+		const currency = "CNY";
+		const HASH = brand_id + brand_uid + api_key;
+		const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
+
+	
+	var options = {
+		method: "POST",
+		url: process.env.DCT_BASE_URL + "/dct/getBalance ",
+		headers: { "content-type": "application/x-www-form-urlencoded" },
+		data: {
+			brand_id: brand_id,
+			brand_uid: brand_uid,
+			currency: currency,
+			sign: hashh
+		},
+	};
+
+	console.log(options.data);
+
+	await axios
+		.request(options)
+		.then(function (response) {
+			console.log("response.data===", response.data + '....' + response.code);
+			if (response.data.status == "0000") {
+				res.json({
+					//status: "0000",
+					//session_url: response.data.url,
+				});
+			} else {
+				res.json({
+					//status: response.data.status,
+					//desc: response.data.desc,
+				});
+			}
+		})
+		.catch(function (error) {
+			console.error(error);
+		});
+
+
+
+	//user.save();
+
+	res.json({ balance });
+});
+
 router.post("/balance", auth, async (req, res) => {
 	let balance = 0;
 	let result = null;
