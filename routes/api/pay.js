@@ -1906,14 +1906,14 @@ router.post("/dc_balance", auth, async (req, res) => {
 		.request(options)
 		.then(function (response) {
 			console.log("response.data===", response.data + '....' + response.code);
-			if (response.data.status == "0000") {
+			if (response.data.status == "1000") {
 				res.json({
-					//status: "0000",
+					status: "0000",
 					//session_url: response.data.url,
 				});
 			} else {
 				res.json({
-					//status: response.data.status,
+					status: response.data.status,
 					//desc: response.data.desc,
 				});
 			}
@@ -1926,7 +1926,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 
 	//user.save();
 
-	res.json({ balance });
+	
 });
 
 router.post("/balance", auth, async (req, res) => {
