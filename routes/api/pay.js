@@ -1969,7 +1969,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 				user.save();
 				console.log("user balance changed....");
 
-				res.json({ bal, totalTurnover, totalBetAmount });
+				res.json({ balance, totalTurnover, totalBetAmount });
 				
 			} else {
 				res.json({
