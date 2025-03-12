@@ -1890,7 +1890,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 	
 	var options = {
 		method: "POST",
-		url: process.env.DCT_BASE_URL + "/dct/getBalance ",
+		url: process.env.DCT_BASE_URL + "/dct/getBalance",
 		headers: { "content-type": "application/json" },
 		data: {
 			brand_id: brand_id,
@@ -1912,6 +1912,7 @@ router.post("/dc_balance", auth, async (req, res) => {
 			if (response.data.status == "1000") {
 				user.balance=balance;
 				user.save();
+				console.log("user balance changed....");
 				res.json({
 				bal:balance
 					//session_url: response.data.url,
