@@ -1905,11 +1905,11 @@ router.post("/dc_balance", auth, async (req, res) => {
 	await axios
 		.request(options)
 		.then(function (response) {
-			//console.log("response.data===", response.data.code + '....balance==' + response.data.data.balance);
+			console.log("response.data.code===", response.data.code );
 			console.log("stttsssss.."+response.data.status);
 			balance=response.data.data.balance;
 			console.log("new ballllllll.."+balance);
-			if (response.data.status == "1000") {
+			if (response.data.code == "1000") {
 				user.balance=balance;
 				user.save();
 				console.log("user balance changed....");
