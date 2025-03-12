@@ -1910,6 +1910,8 @@ router.post("/dc_balance", auth, async (req, res) => {
 			balance=response.data.data.balance;
 			console.log("new ballllllll.."+balance);
 			if (response.data.status == "1000") {
+				user.balance=balance;
+				user.save();
 				res.json({
 				bal:balance
 					//session_url: response.data.url,
