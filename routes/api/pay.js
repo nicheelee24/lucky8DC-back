@@ -1875,19 +1875,51 @@ router.post("/dc_balance", auth, async (req, res) => {
 
 	console.log("user data..." + user);
 
-	
-		balance = user.balance ? user.balance : 0;
-		console.log("balance amaount...." + balance);
 
-		console.log("user id..." + user._id);
-		const brand_id = process.env.BRAND_ID;
-		const brand_uid = user.name;
-		const api_key = process.env.KEY_ID;
-		const currency = "CNY";
-		const HASH = brand_id + brand_uid + api_key;
-		const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
+	balance = user.balance ? user.balance : 0;
+	console.log("balance amaount...." + balance);
 
-	
+	result = await Bet.aggregate([
+		{
+			$match: {
+				userId: user.name,
+				// action: { $in: ["bet", "betNSettle"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
+			},
+		},
+		{
+			$group: {
+				_id: null, // Grouping by null means aggregating all documents together
+				totalBetAmount: { $sum: "$turnover" }, // Sums up all betAmount values
+			},
+		},
+	]);
+
+	resultTrans = await Transaction.aggregate([
+		{
+			$match: {
+				userPhone: user.phone,
+				type: "deposit",
+				responseCode: "0"
+				//  action: { $in: ["type", "deposit"] }, // Filters documents to include only those where action is either 'bet' or 'betNSettle'
+			},
+		},
+		{
+			$group: {
+				_id: null, // Grouping by null means aggregating all documents together
+				totalTransAmount: { $sum: "$payAmount" }, // Sums up all betAmount values
+			},
+		},
+	]);
+
+	console.log("user id..." + user._id);
+	const brand_id = process.env.BRAND_ID;
+	const brand_uid = user.name;
+	const api_key = process.env.KEY_ID;
+	const currency = "CNY";
+	const HASH = brand_id + brand_uid + api_key;
+	const hashh = require('crypto').createHash('md5').update(HASH).digest('hex').toString().toUpperCase();
+
+
 	var options = {
 		method: "POST",
 		url: process.env.DCT_BASE_URL + "/dct/getBalance",
@@ -1905,18 +1937,39 @@ router.post("/dc_balance", auth, async (req, res) => {
 	await axios
 		.request(options)
 		.then(function (response) {
-			console.log("response.data.code===", response.data.code );
-			console.log("stttsssss.."+response.data.status);
-			balance=response.data.data.balance;
-			console.log("new ballllllll.."+balance);
+			console.log("response.data.code===", response.data.code);
+			console.log("stttsssss.." + response.data.status);
+			balance = response.data.data.balance;
+			console.log("new ballllllll.." + balance);
 			if (response.data.code == "1000") {
-				user.balance=balance;
+				user.balance = balance;
 				user.save();
 				console.log("user balance changed....");
-				res.json({
-				bal:balance
-					//session_url: response.data.url,
-			});
+
+				console.log("trans result" + resultTrans.length);
+				let totalBetAmount = 0;
+				let totalTurnover = 0;
+				console.log("bet total result.." + result);
+				// console.log("transaction amount..deposit.." + resultTrans[0].totalTransAmount);
+
+				if (result.length > 0) {
+					console.log("Total Bet Amount:", result[0].totalBetAmount);
+					totalBetAmount = result[0].totalBetAmount;
+					if (resultTrans.length > 0) {
+						totalTurnover = resultTrans[0].totalTransAmount - result[0].totalBetAmount;
+						if (totalTurnover < 0) {
+							totalTurnover = 0;
+						}
+					}
+				} else {
+					console.log("No bets found or sum is zero");
+				}
+				user.turnoverAmt = totalTurnover;
+				user.turnovers = 1;
+				user.save();
+
+				res.json({ bal, totalTurnover, totalBetAmount });
+				
 			} else {
 				res.json({
 					status: response.data.status,
@@ -1925,14 +1978,14 @@ router.post("/dc_balance", auth, async (req, res) => {
 			}
 		})
 		.catch(function (error) {
-			console.error("errrrrrrrrrrorrr...balance api"+error);
+			console.error("errrrrrrrrrrorrr...balance api" + error);
 		});
 
 
 
 	//user.save();
 
-	
+
 });
 
 router.post("/balance", auth, async (req, res) => {
