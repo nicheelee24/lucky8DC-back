@@ -1942,9 +1942,8 @@ router.post("/dc_balance", auth, async (req, res) => {
 			balance = response.data.data.balance;
 			console.log("new ballllllll.." + balance);
 			if (response.data.code == "1000") {
-				user.balance = balance;
-				user.save();
-				console.log("user balance changed....");
+				
+				
 
 				console.log("trans result" + resultTrans.length);
 				let totalBetAmount = 0;
@@ -1964,9 +1963,11 @@ router.post("/dc_balance", auth, async (req, res) => {
 				} else {
 					console.log("No bets found or sum is zero");
 				}
+				user.balance = balance;
 				user.turnoverAmt = totalTurnover;
 				user.turnovers = 1;
 				user.save();
+				console.log("user balance changed....");
 
 				res.json({ bal, totalTurnover, totalBetAmount });
 				
