@@ -127,7 +127,6 @@ async function registerToSBO(username, platform) {
             Username: username,
             UserGroup: "a",
             Agent: platform,
-            DisplayName: username,
             CompanyKey: process.env.SBO_COMPANY_KEY,
             ServerId: "create-new-player-under-luckygaoagent",
         },
@@ -215,7 +214,7 @@ router.post(
 //console.log("after awc response..");
 
             // register SBO
-          //  await registerToSBO(user.name, user.platform);
+           await registerToSBO(user.name, 'luckygaoagent');
 
            // console.log(resp_awc);
            // console.log("after console..log..");
