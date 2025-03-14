@@ -290,19 +290,21 @@ router.get("/play/:id", auth, async (req, res) => {
             .catch(function (error) {
                 console.error(error);
             });
-
-
-
-
-
-          
-            
-          
-           
-            
-                       
-
-            
+               
+        }
+        if (game.platform == "SBO") {
+            const user = await User.findById(req.user.id).select("-password");
+            const resp_sbo = await loginToSBO(user.name);
+            if (resp_sbo.error.msg == "No Error")
+                res.json({
+                    status: "0000",
+                    session_url: resp_sbo.url,
+                });
+            else
+                res.json({
+                    status: "0001",
+                    desc: resp_sbo.error.msg,
+                });
         }
     }
         
@@ -378,6 +380,8 @@ router.post("/play", auth, async (req, res) => {
                 };
             }
         }
+
+        
         if(platform!='yg')
         {
            
