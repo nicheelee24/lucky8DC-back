@@ -267,4 +267,27 @@ router.post("/change-password", auth, async (req, res) => {
     }
 });
 
+router.post("/cricket_auth",async(req,res)=>{
+    var project_key = 'RS_P_1903421301486391315'
+var api_key = 'RS5:6a777955dd8a7fb0490fcd4e3a972c91'
+var request = require('request')
+var options = {
+method: 'POST',
+url: `https://api.sports.roanuz.com/v5/core/${project_key}/auth/`,
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({
+api_key: `${api_key}`
+})
+}
+request(options, function (error, response) {
+if (error) throw new Error(error)
+console.log(response.body)
+})
+
+}
+
+)
+
 module.exports = router;
